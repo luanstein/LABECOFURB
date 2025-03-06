@@ -48,8 +48,7 @@ dadosok <- WDI(indicator = variaveis,
 
 #BASE DE DADOS DA PPW (BRASIL)
 dadosbr <- WDI(indicator = variaveis,
-               country = 'BR', #CODIGO Iso2C
-               start = 1961, end = 2018)
+               country = 'BR'), #CODIGO Iso2C
 
 dadosbrcomple <- WDI(indicator = variaveis,
                    country = 'BR')
