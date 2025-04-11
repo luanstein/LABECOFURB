@@ -1,0 +1,83 @@
+---
+title: "Luan Gabriel Constantino Stein"
+format: html
+editor: visual
+---
+
+```{r}
+#| label: load-packages
+#| include: false
+
+library(tidyverse)
+library(WDI)
+```
+
+```{r}
+#| label: load-data
+#| include: false
+
+library(WDI)
+options(scipen = 999)
+#CÓDIGO DE CARREGAMENTO DE DADOS
+# Definir as variáveis
+variaveis <- c('NE.IMP.GNFS.CD', 'NE.EXP.GNFS.CD')  # Importações e Exportações de bens e serviços
+ano <- 2022  # Ano para o corte transversal
+
+# Baixar os dados do Banco Mundial para vários países em 2022
+dados_corte <- WDI(country = "all", indicator = variaveis, start = ano, end = ano)
+
+# Filtrar os 30 países com maior valor de exportação
+top_30_paises <- dados_corte %>%
+  arrange(desc(NE.EXP.GNFS.CD)) %>%
+  head(30)
+
+# Baixar dados de Crescimento do PIB para a Suíça (código CHE)
+variaveis <- c("NY.GDP.MKTP.KD.ZG")  # Apenas Crescimento do PIB
+dados_serie_temporal <- WDI(country = "CHE", indicator = variaveis, start = 2000, end = 2022)
+
+# Verificar os dados
+head(dados_serie_temporal)
+```
+
+## Gráfico de série transversal
+
+O gráfico ilustra uma análise de corte transversal utilizando dados de 30 países/regiões com os maiores volumes de **exportação e importação** no ano de 2022, conforme os registros do Banco Mundial.
+
+```{r}
+#| label: graf1
+#| warning: false
+#| echo: false
+
+ggplot(top_30_paises, aes(x = NE.IMP.GNFS.CD, y = NE.EXP.GNFS.CD)) +
+  geom_jitter(aes(color = country), width = 1.5, height = 1.5, size = 4) +
+  geom_text(aes(label = country), size = 3, vjust = -1, check_overlap = TRUE) +
+  labs(x = "Importações (US$)", 
+       y = "Exportações (US$)", 
+       title = "Corte Transversal: Importações vs Exportações em 2022 (30 países)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1), 
+        legend.position = "none")  # Ajuste dos rótulos no eixo X e removendo a legenda
+```
+
+BANCO MUNDIAL. World Development Indicators – NE.IMP.GNFS.CD, NE.EXP.GNFS.CD. Disponível em: <https://databank.worldbank.org/source/world-development-indicators.>
+
+##   Gráfico de corte temporal
+
+O gráfico apresenta a evolução da taxa de crescimento do Produto Interno Bruto (PIB) da Suíça entre os anos de 2000 e 2022, conforme dados do Banco Mundial. Observa-se que o desempenho econômico do país variou significativamente ao longo do período.
+
+```{r}
+#| label: graf2
+#| warning: false
+#| echo: false
+
+ggplot(dados_serie_temporal, aes(x = year, y = NY.GDP.MKTP.KD.ZG)) +
+  geom_line(color = "green", size = 1.5) +  # Linha representando o Crescimento do PIB
+  geom_point(color = "red", size = 2) +  # Adicionando pontos para cada ano
+  labs(x = "Ano", 
+       y = "Crescimento do PIB (%)", 
+       title = "Crescimento do PIB na Suíça (2000-2022)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Ajuste dos rótulos do eixo X
+```
+
+BANCO MUNDIAL. World Development Indicators – NY.GDP.MKTP.KD.ZG (Suíça). Disponível em: <https://databank.worldbank.org/source/world-development-indicators.>
