@@ -1,0 +1,74 @@
+---
+title: "Evolução Taxa Referencial - Luan Stein"
+format: html
+editor: visual
+---
+
+```{r}
+#| label: load-packages
+#| include: false
+
+library(GetBCBData)
+library(tidyverse)
+library(zoo)
+```
+
+```{r}
+#| label: load-data
+#| include: false
+
+# Baixar dados da TR
+my.id <- c(tr = 226)
+
+df.bcb <- gbcbd_get_series(id = my.id,
+                           first.date = '2000-01-01',
+                           last.date = Sys.Date(),
+                           format.data = 'long',
+                           use.memoise = TRUE,
+                           cache.path = tempdir(),
+                           do.parallel = FALSE)
+
+# Calcular média móvel de 12 meses
+df.bcb <- df.bcb %>%
+  arrange(ref.date) %>%
+  mutate(media_movel = rollmean(value, k = 12, fill = NA))
+```
+
+A **TR** é uma taxa calculada pelo Banco Central do Brasil com base nas taxas de juros praticadas em operações de Depósitos a Prazo (como CDBs). Ela não representa um juro real de mercado, mas sim uma taxa de referência usada como base de cálculo
+
+------------------------------------------------------------------------
+
+Linha azul: série da TR.
+
+Linha pontilhada laranja: média móvel (12 meses).
+
+Linha vertical vermelha: exemplo da crise de 2008.
+
+```{r}
+#| label: graf1
+#| warning: false
+#| echo: false
+
+p <- ggplot(df.bcb, aes(x = ref.date, y = value)) +
+  geom_line(color = "steelblue", size = 1) +
+  geom_line(aes(y = media_movel), color = "orange", linetype = "dotted", size = 1) +
+  geom_vline(xintercept = as.Date("2008-09-15"), linetype = "dashed", color = "red") +
+  annotate("text", x = as.Date("2008-09-15"), y = max(df.bcb$value, na.rm = TRUE),
+           label = "Crise 2008", vjust = -0.5, color = "red", size = 3.5) +
+  labs(
+    title = 'Evolução da Taxa Referencial (TR) no Brasil',
+    subtitle = paste0(format(min(df.bcb$ref.date), "%Y"), " a ", format(max(df.bcb$ref.date), "%Y")),
+    x = '',
+    y = 'TR (% ao mês)'
+  ) +
+  theme_minimal(base_size = 14)
+
+print(p)
+```
+
+A média móvel de 12 meses é um cálculo que mostra a média dos últimos 12 meses para cada ponto no tempo, ajudando a visualizar a tendência geral dos dados. Com ela, é possível identificar o equilíbrio dos preços no mercado, observando tendências de alta, neutra ou baixa.
+
+**BANCO CENTRAL DO BRASIL.** Séries Temporais. Disponível em: <https://www3.bcb.gov.br/sgspub/localizarseries/localizarSeries.do?method=prepararTelaLocalizarSeries>. Acesso em: 09 maio 2025.\
+\
+**TORO INVESTIMENTOS.** Média Móvel: aprenda o que é e como utilizar esse indicador. Disponível em: [https://blog.toroinvestimentos.com.br/trading/media-movel/.](https://blog.toroinvestimentos.com.br/trading/media-movel/)
+Acesso em: 16 maio 2025.
