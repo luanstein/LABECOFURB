@@ -74,7 +74,7 @@ p <- ggplot(df.bcb, aes(x = ref.date)) +
   labs(
     title = 'Evolução da Taxa Referencial (TR) no Brasil',
     subtitle = 'Ano: {frame_along}',
-    x = '',
+    x = 'Ano',
     y = 'TR (% ao mês)'
   ) +
   theme_minimal(base_size = 14) +
